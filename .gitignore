@@ -1,0 +1,8 @@
+venv
+archive
+__pycache__
+conversationbot
+my-test-nb.ipynb
+.env
+id-map.json
+logs.json
