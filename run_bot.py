@@ -3,11 +3,19 @@ from langchain.globals import set_debug
 from langchain.prompts import PromptTemplate
 from langchain_openai import OpenAI
 from langchain_community.llms import Ollama
+from datetime import datetime
 
 import os
 import json
 from utils import parse_response_into_objects, parse_conversation_to_string, prune_conversation_to_token_limit
 from dotenv import load_dotenv
+
+
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+directory = "archive"
+if not os.path.exists(directory):
+    os.makedirs(directory)
 
 # Load environment variables from .env file
 load_dotenv()
@@ -120,10 +128,10 @@ def reply_message(message):
     print(conversations)
 
 
-    with open("logs.json", 'w+') as f:
+    with open(os.path.join(directory, "logs_" + timestamp + ".json"), 'w+') as f:
         json.dump(conversations, f)
 
-    with open("id-map.json", 'w+') as f:
+    with open(os.path.join(directory, "id-map_" + timestamp + ".json"), 'w+') as f:
         json.dump(id_map, f)
 
 bot.infinity_polling()
