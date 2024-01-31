@@ -2,6 +2,8 @@ import telebot
 from langchain.globals import set_debug
 from langchain.prompts import PromptTemplate
 from langchain_openai import OpenAI
+from langchain_community.llms import Ollama
+
 import os
 import json
 from utils import parse_response_into_objects, parse_conversation_to_string, prune_conversation_to_token_limit
@@ -30,7 +32,8 @@ template = """
 >>> hey<|im_end|>
 """
 
-model = OpenAI(base_url=YOUR_MODEL_ENDPOINT, top_p=0.75, temperature=0.98, frequency_penalty=0, presence_penalty=0, best_of=1, max_tokens=256)
+# model = OpenAI(base_url=YOUR_MODEL_ENDPOINT, top_p=0.75, temperature=0.98, frequency_penalty=0, presence_penalty=0, best_of=1, max_tokens=256)
+model = Ollama(model="jon-tele", top_p=0.75, temperature=0.98)
 
 # Store the for each user
 conversations = {}
@@ -61,6 +64,9 @@ def generate_response_chat(conversation_history: list, user_name) -> str:
   prompt = PromptTemplate(template=full_string, input_variables=["user", "assistant"])
   chain = prompt | model
   response =chain.invoke({"user": f"{user_name}", "assistant": f"{YOUR_NAME}"})
+
+  # For Ollama need to get rid of extra <|im_end|> token at the end for some reason
+  response = response.replace("<|im_end|>", "")
   return response
 
 def generate_response_with_conversation_tracking(text_message: str, user_id, user_name):
@@ -101,7 +107,8 @@ def reply_message(message):
 
     # Handle /clear command
     if message.text == '/clear':
-        conversations[user_id] = []
+        # conversations[user_id] = []
+        # TODO: add a function to push message history to a db and clear the conversation for the current context
         bot.reply_to(message, "Conversations and responses cleared!")
         return
 
